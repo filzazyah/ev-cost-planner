@@ -14,7 +14,9 @@
 <div class="metrics" aria-live="polite"><div class="metric"><span>Estimasi biaya / bulan</span><strong id="mMonthly">Rp0</strong><small>Termasuk buffer anggaran</small></div><div class="metric"><span>Estimasi biaya / tahun</span><strong id="mYearly">Rp0</strong><small>Proyeksi 12 bulan</small></div><div class="metric"><span>Biaya per kilometer</span><strong id="mKm">—</strong><small>Berdasarkan jarak tahunan</small></div></div>
 <div class="layout"><div>
 <section class="panel"><div class="heading"><span class="number">01</span><h2>Profil kendaraan & pemakaian</h2></div><p class="desc">Isi berdasarkan penggunaan rata-rata Anda.</p><div class="fields">
-<div class="field full"><label for="car">Nama mobil (opsional)</label><input id="car" value="Mobil listrik saya" maxlength="70"></div>
+<div class="field full"><label for="model">Pilih model BYD ATTO 1</label><select id="model"><option value="dynamic">Dynamic — Standard Range</option><option value="premium">Premium — Long Range</option><option value="custom">Mobil listrik lain / input manual</option></select><span class="hint">Preset mengisi kapasitas baterai, jarak WLTP, dan konsumsi awal. Anda tetap bisa mengubah angka.</span></div>
+<div class="field full"><div id="vehicleSpecs" class="callout" style="margin-top:0;color:#28564b;background:#f0faf5;border-color:#d1eee2"><b>BYD ATTO 1 Dynamic</b><br>Baterai 30,08 kWh · jarak WLTP 230 km · AC maks. 6,6 kW · DC maks. 30 kW · ban 185/55 R16.<br><span class="hint">Spesifikasi berdasarkan brosur resmi BYD Indonesia. Jarak nyata tergantung kondisi berkendara.</span></div></div>
+<div class="field full"><label for="car">Nama mobil (opsional)</label><input id="car" value="BYD ATTO 1 Dynamic" maxlength="70"></div>
 <div class="field"><label for="distance">Jarak tempuh per bulan</label><div class="wrap"><input id="distance" type="number" min="0" max="20000" step="100" value="1200"><span class="suffix">km</span></div></div>
 <div class="field"><label for="efficiency">Konsumsi energi<span class="hint">Per 100 km</span></label><div class="wrap"><input id="efficiency" type="number" min="5" max="50" step=".1" value="15"><span class="suffix">kWh/100 km</span></div></div>
 <div class="field"><label for="homeShare">Charging di rumah</label><div class="wrap"><input id="homeShare" type="number" min="0" max="100" step="5" value="80"><span class="suffix">%</span></div></div>
@@ -22,8 +24,8 @@
 <div class="field"><label for="publicRate">Tarif charging publik</label><div class="wrap"><input id="publicRate" type="number" min="0" max="30000" step="100" value="2500"><span class="suffix">Rp/kWh</span></div></div>
 <div class="field"><label for="loss">Rugi charging</label><div class="wrap"><input id="loss" type="number" min="0" max="30" step="1" value="10"><span class="suffix">%</span></div><span class="hint">Perkiraan energi dari jaringan.</span></div>
 </div></section>
-<section class="panel"><div class="heading"><span class="number">02</span><h2>Pemeliharaan rutin</h2></div><p class="desc">Gunakan biaya aktual atau perkiraan servis kendaraan.</p><div class="fields">
-<div class="field"><label for="service">Servis berkala / tahun</label><div class="wrap"><input id="service" type="number" min="0" value="1500000"><span class="suffix">Rp/th</span></div></div>
+<section class="panel"><div class="heading"><span class="number">02</span><h2>Pemeliharaan rutin</h2></div><p class="desc">BYD menyebut interval rutin umumnya 1 tahun atau 20.000 km; biaya servis awal Rp1 juta/tahun adalah estimasi publik yang dilaporkan media berdasarkan data internal BYD, bukan tarif resmi tetap.</p><div class="fields">
+<div class="field"><label for="service">Servis berkala / tahun <span class="hint">Estimasi awal; konfirmasi ke dealer</span></label><div class="wrap"><input id="service" type="number" min="0" value="1000000"><span class="suffix">Rp/th</span></div></div>
 <div class="field"><label for="tires">Biaya satu set ban</label><div class="wrap"><input id="tires" type="number" min="0" value="4000000"><span class="suffix">Rp/set</span></div></div>
 <div class="field"><label for="tireLife">Umur pakai satu set ban</label><div class="wrap"><input id="tireLife" type="number" min="5000" max="150000" value="40000"><span class="suffix">km</span></div></div>
 <div class="field"><label for="other">Wiper, filter, rem, cairan</label><div class="wrap"><input id="other" type="number" min="0" value="600000"><span class="suffix">Rp/th</span></div></div>
@@ -45,6 +47,8 @@
 <script>
 (function(){
 const $=id=>document.getElementById(id), ids=['car','distance','efficiency','homeShare','homeRate','publicRate','loss','service','tires','tireLife','other','tax','insurance','parking','emergency','batteryOn','battery','buffer'];
+const MODELS={dynamic:{name:'BYD ATTO 1 Dynamic',battery:30.08,range:230,dc:30,eff:13.1},premium:{name:'BYD ATTO 1 Premium',battery:38.88,range:300,dc:40,eff:13.0},custom:{name:'Mobil listrik saya',battery:null,range:null,dc:null,eff:15}};
+function setModel(key){const m=MODELS[key]||MODELS.dynamic;$('car').value=m.name;if(m.battery){$('efficiency').value=m.eff;$('vehicleSpecs').innerHTML='<b>'+m.name+'</b><br>Baterai '+m.battery.toLocaleString('id-ID')+' kWh · jarak WLTP '+m.range+' km · AC maks. 6,6 kW · DC maks. '+m.dc+' kW · ban 185/55 R16.<br><span class="hint">Sumber: brosur resmi BYD Indonesia. Jarak nyata dan konsumsi listrik dapat berbeda.</span>';}else{$('vehicleSpecs').innerHTML='<b>Input manual</b><br>Masukkan konsumsi energi dan biaya kendaraan sesuai data Anda.';}$('efficiency').dispatchEvent(new Event('input',{bubbles:true}));}
 const money=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number.isFinite(n)?n:0);
 const val=id=>Math.max(0,Number($(id).value)||0), cap=(v,a,b)=>Math.min(b,Math.max(a,v));let last;
 function calc(){
@@ -62,10 +66,10 @@ $('legend').innerHTML=active.map(p=>'<div class="name"><i class="dot" style="bac
 $('breakdown').innerHTML=parts.map(p=>'<tr><td>'+p.name+'</td><td>'+money(p.year/12)+'</td></tr>').join('')+'<tr><td>Subtotal</td><td>'+money(subtotal/12)+'</td></tr><tr><td>Buffer ekstra</td><td>'+money(buffer/12)+'</td></tr><tr><td>Total anggaran</td><td>'+money(monthly)+'</td></tr><tr><td>Biaya per km</td><td>'+(yearlyKm?money(annual/yearlyKm):'—')+'</td></tr>';
 $('batteryWrap').classList.toggle('hidden',!$('batteryOn').checked);
 }
-ids.forEach(id=>$(id).addEventListener('input',calc));$('batteryOn').addEventListener('change',calc);
+ids.forEach(id=>$(id).addEventListener('input',calc));$('batteryOn').addEventListener('change',calc);$('model').addEventListener('change',e=>setModel(e.target.value));
 $('print').addEventListener('click',()=>window.print());
-$('reset').addEventListener('click',()=>{const defaults={car:'Mobil listrik saya',distance:1200,efficiency:15,homeShare:80,homeRate:1444.7,publicRate:2500,loss:10,service:1500000,tires:4000000,tireLife:40000,other:600000,tax:1000000,insurance:5000000,parking:200000,emergency:1200000,battery:2000000,buffer:10};Object.entries(defaults).forEach(([k,v])=>$(k).value=v);$('batteryOn').checked=true;calc()});
+$('reset').addEventListener('click',()=>{const defaults={car:'BYD ATTO 1 Dynamic',distance:1200,efficiency:13.1,homeShare:80,homeRate:1444.7,publicRate:2500,loss:10,service:1000000,tires:4000000,tireLife:40000,other:600000,tax:1000000,insurance:5000000,parking:200000,emergency:1200000,battery:2000000,buffer:10};Object.entries(defaults).forEach(([k,v])=>$(k).value=v);$('model').value='dynamic';$('batteryOn').checked=true;setModel('dynamic');calc()});
 $('csv').addEventListener('click',()=>{if(!last)return;const rows=[['EV Cost Planner - Rincian Biaya'],['Kendaraan',last.car],['Jarak per bulan (km)',last.km],['Jarak per tahun (km)',last.yearlyKm],['Komponen','Biaya per tahun (Rp)','Biaya per bulan (Rp)'],...last.parts.map(p=>[p.name,Math.round(p.year),Math.round(p.year/12)]),['Subtotal',Math.round(last.subtotal),Math.round(last.subtotal/12)],['Buffer '+Math.round(last.bp*100)+'%',Math.round(last.buffer),Math.round(last.buffer/12)],['Total anggaran',Math.round(last.annual),Math.round(last.monthly)],['Biaya per km (Rp)',Math.round(last.perKm),'']];const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));const a=document.createElement('a');a.href=url;a.download='ev-cost-planner.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)});
-calc();
+setModel('dynamic');calc();
 })();
 </script></body></html>
